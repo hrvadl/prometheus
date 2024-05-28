@@ -1,0 +1,54 @@
+groups:
+  - name: app-alert-rules
+    rules:
+      - alert: HighRequestLatency
+        expr: rate(testapp_name_requests_time_sum[5m])/rate(testapp_name_requests_time_count[5m]) > 2
+        for: 1m
+        labels:
+          severity: warn
+          category: server
+          app_type: go
+        annotations:
+          summary: High request latency
+          description: Request latency for {{ $labels.instance }} is {{ $value }}s
+      - alert: HighRequestLatency
+        expr: rate(testapp_name_requests_time_sum[5m])/rate(testapp_name_requests_time_count[5m]) > 5
+        for: 1m
+        labels:
+          severity: critical
+          category: server
+        annotations:
+          summary: High request latency
+          description: Request latency for {{ $labels.instance }} is {{ $value }}s
+  - name: node-alert-rules
+    rules:
+      - alert: NodeExporterDown
+        expr: up{job="node_exporter"} == 0
+        for: 2m
+        labels:
+          app_type: linux
+          severity: critical
+          category: server
+        annotations:
+          summary: Node exporter is down
+          description: Node exporter is dowm for {{ $labels.instance }}
+      - alert: NodeMemoryUsageHigherThan60
+        expr: (node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes * 100) < 60
+        for: 1m
+        labels:
+          severity: warn
+          app_type: linux
+          category: memory
+        annotations:
+          summary: Node memory usage is higher than 70%
+          description: Node memory usage for {{ $labels.instance }} has reached {{ $value }}
+      - alert: NodeMemoryUsageHigherThan70
+        expr: (node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes * 100) < 70
+        for: 1m
+        labels:
+          severity: critical
+          app_type: linux
+          category: memory
+        annotations:
+          summary: Node memory usage is higher than 70%
+          description: Node memory usage for {{ $labels.instance }} has reached {{ $value }}
